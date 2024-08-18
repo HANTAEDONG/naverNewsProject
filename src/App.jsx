@@ -3,16 +3,30 @@ import useGetNews from "./hooks/useGetNews";
 
 const App = () => {
   const [text, setText] = useState("");
+  const [data, setData] = useState({});
+  const [isData, setIsData] = useState(false);
+
   const onChange = (e) => {
     setText(e.target.value);
   };
+
   const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
-      useGetNews(text);
+      const articleData = await useGetNews(text);
+      if (articleData) {
+        setIsData(true);
+        setData(articleData);
+      }
     }
   };
+
   const onClick = async () => {
-    useGetNews(text);
+    const articleData = await useGetNews(text);
+    if (articleData) {
+      setIsData(true);
+      setData(articleData);
+      console.log(data);
+    }
   };
 
   return (
@@ -22,11 +36,17 @@ const App = () => {
         <input
           placeholder="검색어를 입력하세요"
           onChange={onChange}
-          onKeyDown={(e) => handleKeyDown(e)}
+          onKeyDown={handleKeyDown}
         />
         <button onClick={onClick}>제출</button>
       </div>
-      <div></div>
+      <div>
+        {isData ? (
+          data.items.map((item, index) => <div key={index}>{item.title}</div>)
+        ) : (
+          <div>데이터가 없습니다.</div>
+        )}
+      </div>
     </>
   );
 };
