@@ -6,7 +6,8 @@ const App = () => {
   const [data, setData] = useState({});
   const [isData, setIsData] = useState(false);
   const [page, setPage] = useState(1);
-  const pageGroup = [1, 2, 3, 4, 5];
+  const [pageGroup, setPageGroup] = useState([1, 2, 3, 4, 5]);
+  // const pageGroup = [1, 2, 3, 4, 5];
 
   const onChange = (e) => {
     setText(e.target.value);
@@ -40,6 +41,12 @@ const App = () => {
       setIsData(true);
       setData(articleData);
       console.log(data);
+    }
+  };
+
+  const beforePageGroup = () => {
+    if (pageGroup[0] === 1) {
+      return;
     }
   };
 
