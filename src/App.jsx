@@ -5,11 +5,14 @@ const App = () => {
   const [text, setText] = useState("");
   const [data, setData] = useState({});
   const [isData, setIsData] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageGroup = [1, 2, 3, 4, 5];
 
   const onChange = (e) => {
     setText(e.target.value);
   };
 
+  // 검색 엔터 이벤트
   const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
       const articleData = await useGetNews(text);
@@ -20,8 +23,19 @@ const App = () => {
     }
   };
 
-  const onClick = async () => {
-    const articleData = await useGetNews(text);
+  // query와 page를 통해 데이터 불러오기(초기 클릭 이벤트, 숫자 버튼 이벤트)
+  const getData = async () => {
+    const articleData = await useGetNews(text, page);
+    if (articleData) {
+      setIsData(true);
+      setData(articleData);
+    }
+  };
+
+  const paginate = async (item) => {
+    setPage(item);
+    console.log("page:", item);
+    const articleData = await useGetNews(text, item);
     if (articleData) {
       setIsData(true);
       setData(articleData);
@@ -38,14 +52,31 @@ const App = () => {
           onChange={onChange}
           onKeyDown={handleKeyDown}
         />
-        <button onClick={onClick}>제출</button>
+        <button onClick={getData}>제출</button>
       </div>
       <div>
         {isData ? (
-          data.items.map((item, index) => <div key={index}>{item.title}</div>)
+          data.items.map((item, index) => (
+            <div key={index}>
+              {index} {item.title}
+            </div>
+          ))
         ) : (
           <div>데이터가 없습니다.</div>
         )}
+      </div>
+      <div>
+        <button>&lt;</button>
+        {pageGroup ? (
+          pageGroup.map((item, index) => (
+            <button key={index} onClick={() => paginate(item)}>
+              {item}
+            </button>
+          ))
+        ) : (
+          <div>페이지 그룹 없음</div>
+        )}
+        <button>&gt;</button>
       </div>
     </>
   );
