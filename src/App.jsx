@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import useGetNews from "./hooks/useGetNews";
 
 const App = () => {
-  const [text, setText] = useState("");
+  const [query, setQuery] = useState("");
   const [data, setData] = useState({});
   const [isData, setIsData] = useState(false);
   const [page, setPage] = useState(1);
@@ -10,17 +10,18 @@ const App = () => {
   const [lastPage, setLastPage] = useState(1);
 
   useEffect(() => {
-    console.log("현재 페이지 그룹:", pageGroup);
-  }, [pageGroup]);
+    console.log(`현재 검색어: ${query}, 마지막 페이지: ${lastPage}`);
+  }, [lastPage]);
 
   const onChange = (e) => {
-    setText(e.target.value);
+    setQuery(e.target.value);
   };
 
   // 검색 엔터 이벤트
   const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
-      const articleData = await useGetNews(text);
+      const articleData = await useGetNews(query);
+      setLastPage(Math.ceil(articleData.total / 12));
       if (articleData) {
         setIsData(true);
         setData(articleData);
@@ -30,7 +31,9 @@ const App = () => {
 
   // query와 page를 통해 데이터 불러오기(초기 클릭 이벤트, 숫자 버튼 이벤트)
   const getData = async () => {
-    const articleData = await useGetNews(text, page);
+    const articleData = await useGetNews(query, page);
+    setLastPage(Math.ceil(articleData.total / 12));
+    console.log("lastPage: " + lastPage);
     if (articleData) {
       setIsData(true);
       setData(articleData);
@@ -40,12 +43,12 @@ const App = () => {
   // 버튼의 숫자에 맞게 데이터 패칭함.
   const paginate = async (number) => {
     setPage(number);
-    console.log("page:", number);
-    const articleData = await useGetNews(text, number);
+    const articleData = await useGetNews(query, number);
+    setLastPage(Math.ceil(articleData.total / 12));
+    console.log("lastPage: " + lastPage);
     if (articleData) {
       setIsData(true);
       setData(articleData);
-      console.log(data);
     }
   };
 
@@ -64,7 +67,9 @@ const App = () => {
 
   // 이후 버튼 눌러 데이터 패칭
   const AfterPageGroup = () => {
-    console.log("AfterPageGroup button clicked");
+    if (pageGroup[4] === 1000) {
+      return;
+    }
     setPageGroup(Array.from(pageGroup, (x) => x + 5));
     try {
       paginate(pageGroup[0] + 5);
