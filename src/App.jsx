@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useGetNews from "./hooks/useGetNews";
 
 const App = () => {
@@ -7,7 +7,11 @@ const App = () => {
   const [isData, setIsData] = useState(false);
   const [page, setPage] = useState(1);
   const [pageGroup, setPageGroup] = useState([1, 2, 3, 4, 5]);
-  // const pageGroup = [1, 2, 3, 4, 5];
+  const [lastPage, setLastPage] = useState(1);
+
+  useEffect(() => {
+    console.log("현재 페이지 그룹:", pageGroup);
+  }, [pageGroup]);
 
   const onChange = (e) => {
     setText(e.target.value);
@@ -33,10 +37,11 @@ const App = () => {
     }
   };
 
-  const paginate = async (item) => {
-    setPage(item);
-    console.log("page:", item);
-    const articleData = await useGetNews(text, item);
+  // 버튼의 숫자에 맞게 데이터 패칭함.
+  const paginate = async (number) => {
+    setPage(number);
+    console.log("page:", number);
+    const articleData = await useGetNews(text, number);
     if (articleData) {
       setIsData(true);
       setData(articleData);
@@ -44,15 +49,27 @@ const App = () => {
     }
   };
 
+  // 이전 버튼 눌러 데이터 패칭
   const beforePageGroup = () => {
     if (pageGroup[0] === 1) {
       return;
     }
+    setPageGroup(Array.from(pageGroup, (x) => x - 5));
+    try {
+      paginate(pageGroup[0] - 5);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
+  // 이후 버튼 눌러 데이터 패칭
   const AfterPageGroup = () => {
-    if (pageGroup[0] === 1) {
-      return;
+    console.log("AfterPageGroup button clicked");
+    setPageGroup(Array.from(pageGroup, (x) => x + 5));
+    try {
+      paginate(pageGroup[0] + 5);
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -79,17 +96,17 @@ const App = () => {
         )}
       </div>
       <div>
-        <button>&lt;</button>
+        <button onClick={() => beforePageGroup()}>&lt;</button>
         {pageGroup ? (
-          pageGroup.map((item, index) => (
-            <button key={index} onClick={() => paginate(item)}>
-              {item}
+          pageGroup.map((number, index) => (
+            <button key={index} onClick={() => paginate(number)}>
+              {number}
             </button>
           ))
         ) : (
           <div>페이지 그룹 없음</div>
         )}
-        <button>&gt;</button>
+        <button onClick={() => AfterPageGroup()}>&gt;</button>
       </div>
     </>
   );
